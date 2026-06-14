@@ -1,0 +1,20 @@
+<group name="sysmon,akira_hunting,">
+  
+  <rule id="100101" level="15">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.commandLine">vssadmin.*delete.*shadows|wmic.*shadowcopy.*delete</field>
+    <description>Critical Alert: Akira Ransomware Activity Detected! Attempt to Delete Shadow Copies for Inhibit System Recovery.</description>
+    <mitre>
+      <id>T1490</id>
+    </mitre>
+  </rule>
+
+  <rule id="100102" level="12">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.commandLine">net.*stop.*WinDefend|sc.*stop.*WinDefend</field>
+    <description>High Alert: Potential Ransomware disabling Windows Defender Security Service.</description>
+    <mitre>
+      <id>T1562.001</id>
+    </mitre>
+  </rule>
+</group>
