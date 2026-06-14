@@ -1,0 +1,18 @@
+<Sysmon schemaversion="4.50">
+  <EventFiltering>
+    <RuleGroup name="Akira_Inhibit_Recovery" groupRelation="or">
+      <ProcessCreate onmatch="include">
+        <CommandLine condition="contains">vssadmin delete shadows</CommandLine>
+        <CommandLine condition="contains">vssadmin.exe delete shadows</CommandLine>
+        <CommandLine condition="contains">wmic shadowcopy delete</CommandLine>
+        
+        <CommandLine condition="contains">net stop WinDefend</CommandLine>
+        <CommandLine condition="contains">sc stop WinDefend</CommandLine>
+        <CommandLine condition="contains">net stop VSS</CommandLine>
+        
+        <CommandLine condition="contains">taskkill /IM sqlservr.exe</CommandLine>
+        <CommandLine condition="contains">taskkill /F /IM oracle.exe</CommandLine>
+      </ProcessCreate>
+    </RuleGroup>
+  </EventFiltering>
+</Sysmon>
