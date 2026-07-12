@@ -1,0 +1,13 @@
+<group name="sysmon,ajax_hunting,">
+  <!-- رول شناسایی تزریق کد مشکوک به فرآیند مرورگرها (حملات استیلر و اسپیوناژ) -->
+  <rule id="100701" level="12">
+    <if_sid>61609</if_sid> <!-- Sysmon Event ID 8: CreateRemoteThread -->
+    <field name="win.eventdata.targetImage" type="pcre2">(?i)(chrome|firefox|msedge)\.exe</field>
+    <!-- مسدود کردن هشدارهای تکراری ناشی از رفتارهای خود مرورگر روی خودش -->
+    <condition name="win.eventdata.sourceImage" type="pcre2" negative="yes">(?i)(chrome|firefox|msedge|csrss)\.exe</condition>
+    <description>⚠️ High Alert: Remote Thread Injection into Web Browser detected (Potential Ajax Security Team Stealer Activity)!</description>
+    <mitre>
+      <id>T1055.002</id>
+    </mitre>
+  </rule>
+</group>
