@@ -34,6 +34,7 @@
 
 * [🎧 شنوتو (Shenoto)](https://shenoto.com/channel/podcast/podfanalborz)
 * [📻 کست‌باکس (Castbox)](https://castbox.fm/vh/6478869)
+* [کانال تلگرام](https://t.me/PodFanAlborz)
 
 ---
 
