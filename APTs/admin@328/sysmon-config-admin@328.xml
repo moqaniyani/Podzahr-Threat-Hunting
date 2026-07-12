@@ -1,0 +1,27 @@
+<Sysmon schemaversion="4.50">
+  <EventFiltering>
+    <!-- Event ID 1: Process Creation - Hunting Scheduled Tasks & Info Scrapers -->
+    <RuleGroup name="admin328_persistence_hunting" groupRelation="or">
+      <ProcessCreate onmatch="include">
+        <!-- شکار ساخت تسک زمان‌بندی‌شده دستی توسط مهاجم (T1053.005) -->
+        <CommandLine condition="contains">schtasks /create</CommandLine>
+        <CommandLine condition="contains">schtasks.exe /create</CommandLine>
+        <!-- شکار ابزارهای کشف اطلاعات لوکال و ایمیل‌ها (Hyperscraper Behavior) -->
+        <Image condition="end with">tasklist.exe</Image>
+        <CommandLine condition="contains">Get-wmiobject</CommandLine>
+      </ProcessCreate>
+    </RuleGroup>
+
+    <!-- 🛑 بخش فوق حیاتی فیلتر هشدارهای کاذب (False Positive Exclusions) -->
+    <RuleGroup name="admin328_fp_exclusions" groupRelation="or">
+      <ProcessCreate onmatch="exclude">
+        <!-- حذف نویز تسک‌های قانونی و خودکار آپدیت‌های ویندوز و نرم‌افزارها -->
+        <ParentImage condition="is">C:\Windows\System32\svchost.exe</ParentImage>
+        <CommandLine condition="contains">GoogleUpdate.exe</CommandLine>
+        <CommandLine condition="contains">AdobeARM.exe</CommandLine>
+        <!-- استثنا کردن ابزارهای قانونی مانیتورینگ سازمان برای تسک‌لیست (مانند سنسورهای PRTG) -->
+        <ParentImage condition="is">C:\Program Files (x86)\PRTG Network Monitor\PRTG Probe.exe</ParentImage>
+      </ProcessCreate>
+    </RuleGroup>
+  </EventFiltering>
+</Sysmon>
