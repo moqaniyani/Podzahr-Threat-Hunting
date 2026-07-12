@@ -1,0 +1,82 @@
+<group name="sysmon,podzahr_hunting,">
+
+  <!-- ========================================== -->
+  <!-- اپیزود ششم: Andariel APT                   -->
+  <!-- ========================================== -->
+  <rule id="100301" level="13">
+    <if_sid>61609</if_sid> <!-- Sysmon Event ID 8 -->
+    <field name="win.eventdata.targetImage" type="pcre2">(?i)(cmd|powershell)\.exe</field>
+    <condition name="win.eventdata.sourceImage" type="pcre2" negative="yes">(?i)(csrss)\.exe</condition>
+    <description>⚠️ Podzahr: Andariel APT Process Injection detected in Memory!</description>
+    <mitre>
+      <id>T1055</id>
+    </mitre>
+  </rule>
+
+  <!-- ========================================== -->
+  <!-- اپیزود هفتم: باج‌افزار Akira                  -->
+  <!-- ========================================== -->
+  <rule id="100401" level="13">
+    <if_sid>61603</if_sid> <!-- Sysmon Event ID 1 -->
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)net\s+stop\s+WinDefend|WinDefend\s+start=\s+disabled</field>
+    <description>🚨 Podzahr: Akira Ransomware Evasion - Security Service Tampering detected!</description>
+    <mitre>
+      <id>T1562.001</id>
+    </mitre>
+  </rule>
+
+  <!-- ========================================== -->
+  <!-- اپیزود هشتم: admin@328 APT                 -->
+  <!-- ========================================== -->
+  <rule id="100501" level="12">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)schtasks(\.exe)?\s+/create</field>
+    <field name="win.eventdata.parentImage" condition="not_contains">svchost.exe</field>
+    <description>⚠️ Podzahr: admin@328 Persistence - Unauthorized Scheduled Task Creation!</description>
+    <mitre>
+      <id>T1053.005</id>
+    </mitre>
+  </rule>
+
+  <!-- ========================================== -->
+  <!-- اپیزود نهم: Agrius APT                     -->
+  <!-- ========================================== -->
+  <rule id="100601" level="14">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)ntdsutil.*(ifm|ac\s+i\s+ntds)</field>
+    <field name="win.eventdata.parentImage" condition="not_contains">wbengine.exe</field>
+    <field name="win.eventdata.image" condition="not_contains">Veeam</field>
+    <description>🔥 Podzahr CRITICAL: Active Directory NTDS.dit Dumping Attempt (Agrius Tactics)!</description>
+    <mitre>
+      <id>T1003.003</id>
+    </mitre>
+  </rule>
+
+  <!-- ========================================== -->
+  <!-- اپیزود دهم: Ajax Security Team             -->
+  <!-- ========================================== -->
+  <rule id="100701" level="12">
+    <if_sid>61609</if_sid>
+    <field name="win.eventdata.targetImage" type="pcre2">(?i)(chrome|firefox|msedge)\.exe</field>
+    <condition name="win.eventdata.sourceImage" type="pcre2" negative="yes">(?i)(chrome|firefox|msedge|csrss)\.exe</condition>
+    <description>⚠️ Podzahr: Browser Injection for Data Stealing detected (Ajax Team Tactics)!</description>
+    <mitre>
+      <id>T1055.002</id>
+    </mitre>
+  </rule>
+
+  <!-- ========================================== -->
+  <!-- اپیزود یازدهم: ALLANITE APT                  -->
+  <!-- ========================================== -->
+  <rule id="100801" level="11">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)findstr.*(pass|password|pwd|config)</field>
+    <field name="win.eventdata.parentImage" condition="not_contains">userinit.exe</field>
+    <field name="win.eventdata.parentImage" condition="not_contains">PRTG Probe.exe</field>
+    <description>⚠️ Podzahr: Sensitive Data and Password Discovery via Findstr (ALLANITE Footprint)!</description>
+    <mitre>
+      <id>T1083</id>
+    </mitre>
+  </rule>
+
+</group>
