@@ -1,0 +1,14 @@
+<group name="sysmon,andariel_hunting,">
+  <!-- رول شناسایی تزریق کد به خط فرمان و مفسرهای سیستم (مخصوص رفتارهای DTrack و تاکتیک لازاروس) -->
+  <rule id="100301" level="13">
+    <if_sid>61609</if_sid> <!-- Sysmon Event ID 8: CreateRemoteThread -->
+    <field name="win.eventdata.targetImage" type="pcre2">(?i)(cmd|powershell)\.exe</field>
+    <!-- فیلتر نویز فرآیندهای قانونی سیستم‌عامل و ابزار مانیتورینگ سازمان برای جلوگیری از آلارم کاذب -->
+    <field name="win.eventdata.sourceImage" condition="not_contains">csrss.exe</field>
+    <field name="win.eventdata.sourceImage" condition="not_contains">PRTG Probe.exe</field>
+    <description>🚨 Critical Alert: Memory Process Injection into Command Interpreter detected (Potential Andariel APT Activity)!</description>
+    <mitre>
+      <id>T1055</id>
+    </mitre>
+  </rule>
+</group>
