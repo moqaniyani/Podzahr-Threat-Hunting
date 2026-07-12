@@ -1,0 +1,23 @@
+<Sysmon schemaversion="4.50">
+  <EventFiltering>
+    <!-- Event ID 1: Process Creation - Hunting NTDSutil Active Directory Dumping -->
+    <RuleGroup name="agrius_credential_dumping_hunting" groupRelation="or">
+      <ProcessCreate onmatch="include">
+        <!-- شکار تلاش برای کپی و استخراج دیتابیس پسوردهای دامین -->
+        <CommandLine condition="contains">ntdsutil</CommandLine>
+        <CommandLine condition="contains">ac i ntds</CommandLine> <!-- مخفف activate instance ntds -->
+        <CommandLine condition="contains">ifm</CommandLine> <!-- متد Install From Media برای دامپ دیتابیس -->
+      </ProcessCreate>
+    </RuleGroup>
+
+    <!-- 🛑 بخش فیلتر هشدارهای کاذب (False Positive Exclusions) -->
+    <RuleGroup name="agrius_fp_exclusions" groupRelation="or">
+      <ProcessCreate onmatch="exclude">
+        <!-- استثنا کردن ابزارهای قانونی و رسمی پشتیبان‌گیری سرور و اکتیو دایرکتوری -->
+        <ParentImage condition="is">C:\Windows\System32\wbengine.exe</ParentImage> <!-- موتور ویندوز سرور بکاپ -->
+        <CommandLine condition="contains">VeeamGuestHelper</CommandLine> <!-- کامپوننت بکاپ‌گیری Veeam -->
+        <CommandLine condition="contains">ntdsutil.exe "activate instance ntds" "semantic database analysis"</CommandLine> <!-- تسک چکاپ دوره‌ای ویندوز -->
+      </ProcessCreate>
+    </RuleGroup>
+  </EventFiltering>
+</Sysmon>
