@@ -1,0 +1,25 @@
+<group name="sysmon,admin328_hunting,">
+  <!-- رول شناسایی ساخت تسک زمان‌بندی‌شده نامتعارف در لایه یوزر -->
+  <rule id="100501" level="13">
+    <if_sid>61603</if_sid> <!-- Sysmon Event ID 1 -->
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)schtasks(\.exe)?\s+/create</field>
+    <!-- اطمینان از اینکه والد پروسس، یک پروسس سیستمی مجاز (svchost) نباشد تا FP رخ ندهد -->
+    <field name="win.eventdata.parentImage" condition="not_contains">svchost.exe</field>
+    <description>⚠️ High Alert: Unauthorized Scheduled Task Creation detected (Potential admin@328 Persistence)!</description>
+    <mitre>
+      <id>T1053.005</id>
+    </mitre>
+  </rule>
+
+  <!-- رول شناسایی جمع‌آوری اطلاعات سیستم و ابزار کشف هویتی -->
+  <rule id="100502" level="10">
+    <if_sid>61603</if_sid>
+    <field name="win.eventdata.image" condition="end">tasklist.exe</field>
+    <!-- فیلتر نویز پراب مانیتورینگ PRTG سازمان برای جلوگیری از هشدارهای مکرر بی‌پایه -->
+    <field name="win.eventdata.parentImage" condition="not_contains">PRTG Probe.exe</field>
+    <description>Suspicious Reconnaissance Activity: Tasklist executed by non-standard parent.</description>
+    <mitre>
+      <id>T1082</id>
+    </mitre>
+  </rule>
+</group>
