@@ -1,0 +1,26 @@
+<Sysmon schemaversion="4.50">
+  <EventFiltering>
+    <!-- Event ID 1: Process Creation - Hunting Sensitive Info Discovery via Findstr -->
+    <RuleGroup name="allanite_discovery_hunting" groupRelation="or">
+      <ProcessCreate onmatch="include">
+        <!-- شکار سوءاستفاده از findstr برای پیدا کردن پسوردها یا کانفیگ‌های حساس شبکه -->
+        <CommandLine condition="contains">findstr /s</CommandLine>
+        <CommandLine condition="contains">findstr /i password</CommandLine>
+        <CommandLine condition="contains">findstr /i pass</CommandLine>
+        <CommandLine condition="contains">findstrpwd</CommandLine>
+      </ProcessCreate>
+    </RuleGroup>
+
+    <!-- 🛑 بخش فیلتر هشدارهای کاذب (False Positive Exclusions) -->
+    <RuleGroup name="allanite_fp_exclusions" groupRelation="or">
+      <ProcessCreate onmatch="exclude">
+        <!-- استثنا کردن اسکریپت‌های قانونی لودینگ دمین ویندوز (Netlogon) -->
+        <ParentImage condition="is">C:\Windows\System32\userinit.exe</ParentImage>
+        <!-- استثنا کردن فرآیندهای ابزارهای مانیتورینگ رسمی سازمان (مانند سنسورهای PRTG) -->
+        <ParentImage condition="is">C:\Program Files (x86)\PRTG Network Monitor\PRTG Probe.exe</ParentImage>
+        <!-- استثنا کردن خط فرمان‌های ناشی از آپدیت‌های ویندوز سرور -->
+        <ParentImage condition="is">C:\Windows\System32\Sysprep\sysprep.exe</ParentImage>
+      </ProcessCreate>
+    </RuleGroup>
+  </EventFiltering>
+</Sysmon>
