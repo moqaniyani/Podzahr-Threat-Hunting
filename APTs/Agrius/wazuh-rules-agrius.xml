@@ -1,0 +1,14 @@
+<group name="sysmon,agrius_hunting,">
+  <!-- رول شناسایی استفاده مشکوک از NTDSutil جهت دامپ پسوردهای دامین -->
+  <rule id="100601" level="14">
+    <if_sid>61603</if_sid> <!-- Sysmon Event ID 1 -->
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)ntdsutil.*ifm</field>
+    <!-- حذف نویز فرآیندهای مجاز بکاپ‌گیری سازمان برای جلوگیری از آلارم کاذب -->
+    <field name="win.eventdata.parentImage" condition="not_contains">wbengine.exe</field>
+    <field name="win.eventdata.image" condition="not_contains">Veeam</field>
+    <description>🚨 Critical Alert: Active Directory Database Dumping Attempt detected (Potential Agrius Activity)!</description>
+    <mitre>
+      <id>T1003.003</id>
+    </mitre>
+  </rule>
+</group>
