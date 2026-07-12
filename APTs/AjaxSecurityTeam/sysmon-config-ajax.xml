@@ -1,0 +1,25 @@
+<Sysmon schemaversion="4.50">
+  <EventFiltering>
+    <!-- Event ID 8: CreateRemoteThread - Hunting Code Injection into Browsers -->
+    <RuleGroup name="ajax_process_injection_hunting" groupRelation="or">
+      <CreateRemoteThread onmatch="include">
+        <!-- شکار تلاش برای تزریق کد فرآیندهای ناشناس به داخل مرورگرها جهت سرقت اطلاعات سشن -->
+        <TargetImage condition="end with">chrome.exe</TargetImage>
+        <TargetImage condition="end with">firefox.exe</TargetImage>
+        <TargetImage condition="end with">msedge.exe</TargetImage>
+      </CreateRemoteThread>
+    </RuleGroup>
+
+    <!-- 🛑 بخش فیلتر هشدارهای کاذب (False Positive Exclusions) -->
+    <RuleGroup name="ajax_fp_exclusions" groupRelation="or">
+      <CreateRemoteThread onmatch="exclude">
+        <!-- استثنا کردن فرآیندهای قانونی و امضاشده سیستم‌عامل و آنتی‌ویروس‌ها -->
+        <SourceImage condition="is">C:\Windows\System32\csrss.exe</SourceImage>
+        <!-- استثنا کردن فرآیندهای بومی خود مرورگرها (ارتباطات داخلی پروسس‌های فرزند مرورگر) -->
+        <SourceImage condition="end with">chrome.exe</SourceImage>
+        <SourceImage condition="end with">firefox.exe</SourceImage>
+        <SourceImage condition="end with">msedge.exe</SourceImage>
+      </CreateRemoteThread>
+    </RuleGroup>
+  </EventFiltering>
+</Sysmon>
