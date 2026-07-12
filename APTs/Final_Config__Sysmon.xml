@@ -1,0 +1,68 @@
+<Sysmon schemaversion="4.50">
+  <EventFiltering>
+    
+    <!-- ==================================================================== -->
+    <!-- [۱] بخش قوانین شامل‌سازی (INCLUSIONS) - تفکیک‌شده بر اساس گروه تهدید  -->
+    <!-- ==================================================================== -->
+    
+    <!-- گروه Andariel & Ajax: شکار پروسس اینجکشن و حافظه رم (Event ID 8) -->
+    <RuleGroup name="podzahr_master_inclusions_memory" groupRelation="or">
+      <CreateRemoteThread onmatch="include">
+        <!-- Andariel: شکار تزریق به مفسرهای خط فرمان -->
+        <TargetImage condition="end with">cmd.exe</TargetImage>
+        <TargetImage condition="end with">powershell.exe</TargetImage>
+        <!-- Ajax Security Team: شکار تزریق به مرورگرها جهت سرقت سشن -->
+        <TargetImage condition="end with">chrome.exe</TargetImage>
+        <TargetImage condition="end with">firefox.exe</TargetImage>
+        <TargetImage condition="end with">msedge.exe</TargetImage>
+      </CreateRemoteThread>
+    </RuleGroup>
+
+    <!-- گروه‌های Akira, Allanite, Agrius: شکار فرآیندها و فرمان‌ها (Event ID 1) -->
+    <RuleGroup name="podzahr_master_inclusions_processes" groupRelation="or">
+      <ProcessCreate onmatch="include">
+        <!-- Akira: شکار تلاش برای متوقف کردن پنهانی ویندوز دیفندر یا فایروال محلی -->
+        <CommandLine condition="contains">net stop WinDefend</CommandLine>
+        <CommandLine condition="contains">sc config WinDefend start= disabled</CommandLine>
+        <!-- Allanite: شکار اسکن فایل‌ها برای کشف پسوردها و کانفیگ‌ها -->
+        <CommandLine condition="contains">findstr /s</CommandLine>
+        <CommandLine condition="contains">findstr /i password</CommandLine>
+        <!-- Agrius: شکار استخراج دیتابیس اکتیو دایرکتوری از دامین کنترلرها -->
+        <CommandLine condition="contains">ntdsutil</CommandLine>
+        <CommandLine condition="contains">ac i ntds</CommandLine>
+        <CommandLine condition="contains">ifm</CommandLine>
+        <!-- admin@328: شکار ایجاد دستی تسک‌های زمان‌بندی شده جهت ماندگاری -->
+        <CommandLine condition="contains">schtasks /create</CommandLine>
+      </ProcessCreate>
+    </RuleGroup>
+
+    <!-- ==================================================================== -->
+    <!-- [۲] بخش متمرکز حذف هشدارهای کاذب (EXCLUSIONS) - جلوگیری از آلِرت فِتیگ -->
+    <!-- ==================================================================== -->
+    
+    <RuleGroup name="podzahr_master_exclusions" groupRelation="or">
+      <ProcessCreate onmatch="exclude">
+        <!-- فیلتر نویز فرآیندهای پس‌زمینه و کامپوننت‌های قانونی ویندوز سرور -->
+        <ParentImage condition="is">C:\Windows\System32\svchost.exe</ParentImage>
+        <ParentImage condition="is">C:\Windows\System32\Sysprep\sysprep.exe</ParentImage>
+        <ParentImage condition="is">C:\Windows\System32\userinit.exe</ParentImage>
+        <ParentImage condition="is">C:\Windows\System32\wbengine.exe</ParentImage> <!-- ویندوز بکاپ -->
+        <!-- فیلتر نویز آپدیت‌های قانونی نرم‌افزارهای سازمان -->
+        <CommandLine condition="contains">GoogleUpdate.exe</CommandLine>
+        <CommandLine condition="contains">AdobeARM.exe</CommandLine>
+        <!-- فیلتر نویز ابزارهای مانیتورینگ شبکه داخلی سازمان (نظیر سنسورهای PRTG) -->
+        <ParentImage condition="is">C:\Program Files (x86)\PRTG Network Monitor\PRTG Probe.exe</ParentImage>
+        <CommandLine condition="contains">VeeamGuestHelper</CommandLine> <!-- بکاپ رسمی سازمان -->
+      </ProcessCreate>
+      
+      <CreateRemoteThread onmatch="exclude">
+        <!-- فیلتر رفتارهای قانونی سیستم‌عامل در لایه رم و ارتباطات داخلی خود مرورگرها -->
+        <SourceImage condition="is">C:\Windows\System32\csrss.exe</SourceImage>
+        <SourceImage condition="end with">chrome.exe</SourceImage>
+        <SourceImage condition="end with">firefox.exe</SourceImage>
+        <SourceImage condition="end with">msedge.exe</SourceImage>
+      </CreateRemoteThread>
+    </RuleGroup>
+
+  </EventFiltering>
+</Sysmon>
