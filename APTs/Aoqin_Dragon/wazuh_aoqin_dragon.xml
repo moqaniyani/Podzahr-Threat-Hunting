@@ -1,24 +1,40 @@
-<!-- این کانفیگ در رول وازو با موفقیت ثبت شد ، لطفا قبل از اعمال روی مقیاس واقعی حتما در آزمایشگاه تست شود -->
+<!-- این رول تست شده است در محیط آزمایشگاهی ، بازهم خودتان تست کنید -->
 <group name="sysmon,aoqin_dragon,g1007,">
 
-  <!-- قانون پایه: شناسایی اجرای فایل از Removable Disk -->
+  <!-- قانون ۱: شناسایی اجرای فایل از درایوهای USB و جانبی با نویزگیری هارد دیسک‌های دوم -->
   <rule id="100201" level="12">
     <if_group>sysmon_event1</if_group>
+    <!-- شکار اجرای پروسس از درایوهای D تا Z -->
     <field name="win.eventdata.image" type="pcre2">^(?i)[d-z]:\\.*\.exe$</field>
-    <description>Padzahr: Suspicious Process Executed from Removable Drive (Possible Aoqin Dragon USB Spreader - T1091)</description>
+    <!-- نویزگیری: استثنا کردن مسیرهای نصب نرم‌افزار استاندارد در درایوهای ثانویه -->
+    <field name="win.eventdata.image" type="pcre2">^(?!(?i)[d-z]:\\(Program Files|Program Files \(x86\)|Steam|Epic Games|GOG Games)\\)</field>
+    <description>Padzahr: Suspicious Process Executed from Removable/Unvalidated Drive (Possible Aoqin Dragon USB Spreader - T1091)</description>
     <mitre>
       <id>T1091</id>
       <id>T1204.002</id>
     </mitre>
   </rule>
 
-  <!-- قانون پیشرفته: شناسایی لود شدن DLLهای مخرب این گروه و جفت‌شدن آن با پروسس والد مشکوک -->
+  <!-- قانون ۲: شناسایی لود شدن DLL در پروسس‌های جاری با نویزگیری مسیرهای رسمی سیستم -->
   <rule id="100202" level="13">
     <if_group>sysmon_event7</if_group>
     <field name="win.eventdata.imageLoaded" type="pcre2">(?i)(encrashrep\.dll|DLL-test\.dll)</field>
-    <!-- نویزگیری: اگر والد پروسس در مسیر اصلی برنامه قانونی (مثل Program Files) نباشد هشدار جدی بده -->
-    <field name="win.eventdata.image" type="pcre2">^(?!C:\\Program Files\\).*</field>
+    <!-- نویزگیری: فقط در صورتی هشدار بحرانی بده که DLL از مسیرهای مشکوک و ناامن لود شده باشد -->
+    <field name="win.eventdata.imageLoaded" type="pcre2">(?i)\\(Users|Temp|Windows\\Temp|Programdata|Perflogs)\\</field>
     <description>Padzahr: Aoqin Dragon Known Malicious DLL Loaded via DLL Hijacking (T1055.001)</description>
+    <mitre>
+      <id>T1055.001</id>
+    </mitre>
+  </rule>
+
+  <!-- قانون ۳: شناسایی فرمان اجرای مستقیم DLLها از روی مسیرهای کاربر (Event ID 1) -->
+ <rule id="100203" level="13">
+    <if_group>sysmon_event1</if_group>
+    <!-- ۱. بررسی حضور نام DLLهای مخرب در خط فرمان -->
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(encrashrep\.dll|DLL-test\.dll)</field>
+    <!-- ۲. بررسی اینکه پروسس در یکی از پوشه‌های ناامن کاربر یا موقت در حال اجراست -->
+    <field name="win.eventdata.currentDirectory" type="pcre2">(?i)\\(Users|Temp|Windows\\Temp|Programdata|Perflogs)\\</field>
+    <description>Padzahr: Critical - Aoqin Dragon Active Process Spawning with Known DLL in User Path (T1055.001)</description>
     <mitre>
       <id>T1055.001</id>
     </mitre>
