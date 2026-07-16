@@ -1,0 +1,31 @@
+<!-- این کانفیگ تست شده است ، لطفا بازهم بررسی کنید در صورتی که مشکل داشت اعلام کنید اصلاح بشه ، با تشکر -->
+<Sysmon schemaversion="4.50">
+  <EventFiltering>
+    <RuleGroup name="Aoqin Dragon Detection" groupRelation="or">
+      
+      <!-- Event ID 1: Process Creation (T1091) -->
+      <ProcessCreate onmatch="include">
+        <!-- هر پروسسی که خارج از مسیرهای استاندارد درایو C اجرا شود -->
+        <Image condition="not begin with">C:\</Image>
+        <!-- شکار مستقیم اجرای rundll32 -->
+        <CommandLine condition="contains">rundll32.exe</CommandLine>
+      </ProcessCreate>
+
+      <!-- Event ID 7: Image Loaded (T1055.001) -->
+      <ImageLoad onmatch="include">
+        <ImageLoaded condition="image">encrashrep.dll</ImageLoaded>
+        <ImageLoaded condition="image">DLL-test.dll</ImageLoaded>
+      </ImageLoad>
+
+    </RuleGroup>
+
+    <!-- نویزگیری برای جلوگیری از هشدارهای کاذب سیستم‌عامل -->
+    <RuleGroup name="Aoqin Dragon Exclusions" groupRelation="or">
+      <ProcessCreate onmatch="exclude">
+        <!-- استثنا کردن دیسک‌های نوری مجازی یا پروسس‌های موقت معتبر در صورت وجود -->
+        <Image condition="end with">\OneDrive.exe</Image>
+        <Image condition="end with">\Dropbox.exe</Image>
+      </ProcessCreate>
+    </RuleGroup>
+  </EventFiltering>
+</Sysmon>
