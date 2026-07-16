@@ -1,0 +1,27 @@
+<!-- این کانفیگ در رول وازو با موفقیت ثبت شد ، لطفا قبل از اعمال روی مقیاس واقعی حتما در آزمایشگاه تست شود -->
+<group name="sysmon,aoqin_dragon,g1007,">
+
+  <!-- قانون پایه: شناسایی اجرای فایل از Removable Disk -->
+  <rule id="100201" level="12">
+    <if_group>sysmon_event1</if_group>
+    <field name="win.eventdata.image" type="pcre2">^(?i)[d-z]:\\.*\.exe$</field>
+    <description>Padzahr: Suspicious Process Executed from Removable Drive (Possible Aoqin Dragon USB Spreader - T1091)</description>
+    <mitre>
+      <id>T1091</id>
+      <id>T1204.002</id>
+    </mitre>
+  </rule>
+
+  <!-- قانون پیشرفته: شناسایی لود شدن DLLهای مخرب این گروه و جفت‌شدن آن با پروسس والد مشکوک -->
+  <rule id="100202" level="13">
+    <if_group>sysmon_event7</if_group>
+    <field name="win.eventdata.imageLoaded" type="pcre2">(?i)(encrashrep\.dll|DLL-test\.dll)</field>
+    <!-- نویزگیری: اگر والد پروسس در مسیر اصلی برنامه قانونی (مثل Program Files) نباشد هشدار جدی بده -->
+    <field name="win.eventdata.image" type="pcre2">^(?!C:\\Program Files\\).*</field>
+    <description>Padzahr: Aoqin Dragon Known Malicious DLL Loaded via DLL Hijacking (T1055.001)</description>
+    <mitre>
+      <id>T1055.001</id>
+    </mitre>
+  </rule>
+
+</group>
